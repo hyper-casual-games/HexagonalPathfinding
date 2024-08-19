@@ -4,7 +4,9 @@ Welcome to the Hexagonal Pathfinding Algorithm repository!
 This project provides a simple and efficient solution for pathfinding on hexagonal grids in Unity. 
 Whether you're developing a strategy game, puzzle, or any application that requires hex-based movement, this algorithm is designed to seamlessly integrate into your Unity projects.
 
-[![Hexagonal Pathfinding Algorithm](https://github.com/user-attachments/assets/0e97bb9d-53d4-4c9f-9c03-a3b8e5a93866)](https://github.com/user-attachments/assets/0e97bb9d-53d4-4c9f-9c03-a3b8e5a93866)
+
+https://github.com/user-attachments/assets/59dd1604-3d96-48a7-9f2e-18112039d412
+
 
 ## Features
 - **Easy Integration:** Plug-and-play with your Unity project.
