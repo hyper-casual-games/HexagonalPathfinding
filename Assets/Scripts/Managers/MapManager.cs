@@ -117,6 +117,9 @@ public class MapManager : MonoBehaviour
             for (int y = 0; y < _mapHeight; y++)
             {
                 bool isWalkable = Random.value > _squareObstacleProbability;
+
+                if (y == 0) isWalkable = true;
+
                 CreateSquareCell(x, y, isWalkable);
             }
         }

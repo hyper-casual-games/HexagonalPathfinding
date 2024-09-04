@@ -57,6 +57,34 @@ public class PathManager : MonoBehaviour
                     {
                         cell.IsWalkable = true;
                         cell.UpdateColor();
+
+                    }
+                    else if (Input.GetKey(KeyCode.M))
+                    {
+
+
+                        if (!cell.IsWalkable)
+                        {
+
+                            cell.IsWalkable = true;
+                            cell.UpdateColor();
+
+
+                            startCell = cell;
+                            OnStartCell?.Invoke(cell);
+                            startCell.Select();
+
+
+                            goalCell = (MapCell)_map.GetCell(cell.X, 0);
+                            goalCell.Select();
+                            OnEndCell?.Invoke(goalCell);
+
+                            StartPathfinding();
+
+                        }
+
+
+
                     }
                     else
                     {

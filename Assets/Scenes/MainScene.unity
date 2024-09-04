@@ -1103,10 +1103,10 @@ MonoBehaviour:
   _mapRadius: 15
   _hexObstacleProbability: 0.25
   _baseCellPrefab: {fileID: 6643912233763793436, guid: 3d0a8db5697314d8c82294bf0859c7dd, type: 3}
-  _mapWidth: 15
+  _mapWidth: 9
   _mapHeight: 15
-  _squareObstacleProbability: 0.459
-  _squareDiagonalSearch: 1
+  _squareObstacleProbability: 0.5
+  _squareDiagonalSearch: 0
   _stepDelay: 0.01
   _generateHexMap: 0
 --- !u!1 &1460236096
