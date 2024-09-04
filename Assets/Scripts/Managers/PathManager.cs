@@ -15,8 +15,8 @@ public class PathManager : MonoBehaviour
     [SerializeField] private LayerMask _layerMask;
 
     private IPathFinder _pathFinder;
-    private ICell startCell;
-    private ICell goalCell;
+    private MapCell startCell;
+    private MapCell goalCell;
     private Stopwatch _stopwatch;
 
   
@@ -43,7 +43,7 @@ public class PathManager : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _layerMask))
             {
-                HexCell cell = hit.collider.GetComponent<HexCell>();
+                MapCell cell = hit.collider.GetComponent<MapCell>();
                 if (cell != null && cell.IsWalkable)
                 {
                     if (startCell == null)
@@ -85,7 +85,7 @@ public class PathManager : MonoBehaviour
           
             _cachedPath.Clear();
 
-            IList<ICell> path = _pathFinder.FindPathOnMap(startCell, goalCell, _mapManager.GetHexMap());
+            IList<ICell> path = _pathFinder.FindPathOnMap(startCell, goalCell, _mapManager.GetMap());
 
             _stopwatch.Stop();
 

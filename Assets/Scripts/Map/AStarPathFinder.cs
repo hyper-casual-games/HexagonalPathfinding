@@ -5,8 +5,11 @@ public class AStarPathFinder : IPathFinder
 {
     private readonly Stack<Dictionary<ICell, ICell>> _dictionaryPool = new Stack<Dictionary<ICell, ICell>>();
     private readonly Stack<Dictionary<ICell, int>> _costPool = new Stack<Dictionary<ICell, int>>();
-    private readonly Stack<List<ICell>> _listPool = new Stack<List<ICell>>();
-    private readonly List<ICell> _neighborBuffer = new List<ICell>();
+    private readonly Stack<List<ICell>> _listPool = new Stack<List<ICell>>(256);
+    private readonly List<ICell> _neighborBuffer = new List<ICell>(512);
+
+    private const int CardinalCost = 1; // Cost for cardinal (up, down, left, right) movement
+    private const int DiagonalCost = 14; // Cost for diagonal movement (approximated by 1.414 * 10 for integer math)
 
     public IList<ICell> FindPathOnMap(ICell cellStart, ICell cellEnd, IMap map)
     {
@@ -33,7 +36,16 @@ public class AStarPathFinder : IPathFinder
             {
                 if (!next.IsWalkable) continue;
 
-                int newCost = costSoFar[current] + 1;
+                // Check if the map is a square map
+                int moveCost = CardinalCost;
+                if (map is SquareMap && IsDiagonalMove(current, next))
+                {
+                    // If it's a diagonal move in a square map, use the higher diagonal cost
+                    moveCost = DiagonalCost;
+                }
+
+                int newCost = costSoFar[current] + moveCost;
+
                 if (!costSoFar.TryGetValue(next, out int oldCost) || newCost < oldCost)
                 {
                     costSoFar[next] = newCost;
@@ -46,7 +58,6 @@ public class AStarPathFinder : IPathFinder
 
         var path = ReconstructPath(cameFrom, cellStart, cellEnd);
 
-      
         ReturnDictionaryToPool(cameFrom);
         ReturnCostDictionaryToPool(costSoFar);
 
@@ -61,8 +72,15 @@ public class AStarPathFinder : IPathFinder
 
     private int Heuristic(ICell a, ICell b)
     {
-     
+        // Manhattan distance heuristic for a square grid
         return Mathf.Abs(a.X - b.X) + Mathf.Abs(a.Y - b.Y);
+    }
+
+    private bool IsDiagonalMove(ICell current, ICell next)
+    {
+        
+        // Check if the movement is diagonal by comparing the changes in x and y
+        return Mathf.Abs(current.X - next.X) == 1 && Mathf.Abs(current.Y - next.Y) == 1;
     }
 
     private List<ICell> ReconstructPath(Dictionary<ICell, ICell> cameFrom, ICell start, ICell end)
@@ -76,7 +94,7 @@ public class AStarPathFinder : IPathFinder
 
             if (!cameFrom.ContainsKey(current))
             {
-                path.Clear(); 
+                path.Clear();
                 break;
             }
 
