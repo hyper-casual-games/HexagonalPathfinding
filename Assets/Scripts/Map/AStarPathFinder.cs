@@ -38,7 +38,7 @@ public class AStarPathFinder : IPathFinder
 
                 // Check if the map is a square map
                 int moveCost = CardinalCost;
-                if (map is SquareMap && IsDiagonalMove(current, next))
+                if (map.IsSquareMap() && IsDiagonalMove(current, next))
                 {
                     // If it's a diagonal move in a square map, use the higher diagonal cost
                     moveCost = DiagonalCost;

@@ -14,7 +14,9 @@ public class PathManager : MonoBehaviour
     [SerializeField] private MapManager _mapManager;
     [SerializeField] private LayerMask _layerMask;
 
+    private IMap _map;
     private IPathFinder _pathFinder;
+
     private MapCell startCell;
     private MapCell goalCell;
     private Stopwatch _stopwatch;
@@ -22,11 +24,14 @@ public class PathManager : MonoBehaviour
   
     private List<ICell> _cachedPath = new List<ICell>();
 
+    
+
    
     private bool _isPathfindingInProgress = false;
 
     private void Start()
     {
+        _map = _mapManager.GetMap();
         _pathFinder = new AStarPathFinder();
         _stopwatch = new Stopwatch();
     }
@@ -43,31 +48,58 @@ public class PathManager : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _layerMask))
             {
+
                 MapCell cell = hit.collider.GetComponent<MapCell>();
-                if (cell != null && cell.IsWalkable)
+                if (cell != null)
                 {
-                    if (startCell == null)
+
+                    if (Input.GetKey(KeyCode.S))
                     {
-                        startCell = cell;
-                        OnStartCell?.Invoke(cell);
-                        cell.Select();
-                    }
-                    else if (goalCell == null && !_isPathfindingInProgress)
-                    {
-                        goalCell = cell;
-                        OnEndCell?.Invoke(cell);
-                        cell.Select();
-                        StartPathfinding();
+                        cell.IsWalkable = true;
+                        cell.UpdateColor();
                     }
                     else
                     {
-                        startCell = null;
-                        goalCell = null;
+
+
+                        if (cell.IsWalkable)
+                        {
+
+                            if (startCell == null)
+                            {
+                                startCell = cell;
+                                OnStartCell?.Invoke(cell);
+                                cell.Select();
+                            }
+                            else if (goalCell == null && !_isPathfindingInProgress)
+                            {
+                                goalCell = cell;
+                                OnEndCell?.Invoke(cell);
+                                cell.Select();
+                                StartPathfinding();
+                            }
+                            else
+                            {
+                                startCell = null;
+                                goalCell = null;
+                            }
+
+                        }
+
                     }
+
+
                 }
+
+
+
             }
         }
     }
+
+
+
+
 
     private void StartPathfinding()
     {
@@ -85,11 +117,11 @@ public class PathManager : MonoBehaviour
           
             _cachedPath.Clear();
 
-            IList<ICell> path = _pathFinder.FindPathOnMap(startCell, goalCell, _mapManager.GetMap());
+            IList<ICell> path = _pathFinder.FindPathOnMap(startCell, goalCell, _map);
 
             _stopwatch.Stop();
 
-            if (path.Count > 0)
+            if (path.Count > 1)
             {
                 _cachedPath.AddRange(path); 
                 _mapManager.HighlightPath(_cachedPath);

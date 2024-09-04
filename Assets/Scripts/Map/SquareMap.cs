@@ -89,4 +89,9 @@ public class SquareMap : IMap
     {
         _cells.Clear();
     }
+
+    public bool IsSquareMap()
+    {
+        return true;
+    }
 }

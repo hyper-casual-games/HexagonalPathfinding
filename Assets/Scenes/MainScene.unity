@@ -1108,7 +1108,7 @@ MonoBehaviour:
   _squareObstacleProbability: 0.459
   _squareDiagonalSearch: 1
   _stepDelay: 0.01
-  _generateHexMap: 1
+  _generateHexMap: 0
 --- !u!1 &1460236096
 GameObject:
   m_ObjectHideFlags: 0

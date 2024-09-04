@@ -49,7 +49,10 @@ public class HexMap : IMap
         _cells.Clear();
     }
 
-    
+    public bool IsSquareMap()
+    {
+       return false;
+    }
 }
 
 

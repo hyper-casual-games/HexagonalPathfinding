@@ -6,4 +6,5 @@ public interface IMap
     ICell GetCell(int x, int y);
     IEnumerable<ICell> GetNeighbors(ICell cell);
     void Clear();
+    bool IsSquareMap();
 }
