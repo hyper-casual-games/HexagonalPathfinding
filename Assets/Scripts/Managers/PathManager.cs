@@ -17,16 +17,12 @@ public class PathManager : MonoBehaviour
     private IMap _map;
     private IPathFinder _pathFinder;
 
-    private MapCell startCell;
-    private MapCell goalCell;
+    private MapCell _startCell;
+    private MapCell _goalCell;
     private Stopwatch _stopwatch;
 
-  
     private List<ICell> _cachedPath = new List<ICell>();
 
-    
-
-   
     private bool _isPathfindingInProgress = false;
 
     private void Start()
@@ -38,120 +34,124 @@ public class PathManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
+        if (IsInputDetected())
         {
-            if (EventSystem.current.IsPointerOverGameObject(Input.touchCount > 0 ? Input.GetTouch(0).fingerId : -1)) return;
-
-            Ray ray = Input.touchCount > 0
-                ? Camera.main.ScreenPointToRay(Input.GetTouch(0).position)
-                : Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _layerMask))
+            MapCell cell = GetClickedCell();
+            if (cell != null)
             {
-
-                MapCell cell = hit.collider.GetComponent<MapCell>();
-                if (cell != null)
-                {
-
-                    if (Input.GetKey(KeyCode.S))
-                    {
-                        cell.IsWalkable = true;
-                        cell.UpdateColor();
-
-                    }
-                    else if (Input.GetKey(KeyCode.M))
-                    {
-
-
-                        if (!cell.IsWalkable)
-                        {
-
-                            cell.IsWalkable = true;
-                            cell.UpdateColor();
-
-
-                            startCell = cell;
-                            OnStartCell?.Invoke(cell);
-                            startCell.Select();
-
-
-                            goalCell = (MapCell)_map.GetCell(cell.X, 0);
-                            goalCell.Select();
-                            OnEndCell?.Invoke(goalCell);
-
-                            StartPathfinding();
-
-                        }
-
-
-
-                    }
-                    else
-                    {
-
-
-                        if (cell.IsWalkable)
-                        {
-
-                            if (startCell == null)
-                            {
-                                startCell = cell;
-                                OnStartCell?.Invoke(cell);
-                                cell.Select();
-                            }
-                            else if (goalCell == null && !_isPathfindingInProgress)
-                            {
-                                goalCell = cell;
-                                OnEndCell?.Invoke(cell);
-                                cell.Select();
-                                StartPathfinding();
-                            }
-                            else
-                            {
-                                startCell = null;
-                                goalCell = null;
-                            }
-
-                        }
-
-                    }
-
-
-                }
-
-
-
+                HandleCellInteraction(cell);
             }
         }
     }
 
+    private bool IsInputDetected()
+    {
+        return Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
+    }
 
+    private MapCell GetClickedCell()
+    {
+        if (EventSystem.current.IsPointerOverGameObject(Input.touchCount > 0 ? Input.GetTouch(0).fingerId : -1))
+            return null;
 
+        Ray ray = Input.touchCount > 0
+            ? Camera.main.ScreenPointToRay(Input.GetTouch(0).position)
+            : Camera.main.ScreenPointToRay(Input.mousePosition);
 
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _layerMask))
+        {
+            return hit.collider.GetComponent<MapCell>();
+        }
+
+        return null;
+    }
+
+    private void HandleCellInteraction(MapCell cell)
+    {
+        if (Input.GetKey(KeyCode.S))
+        {
+            SetCellWalkable(cell);
+        }
+        else if (Input.GetKey(KeyCode.M))
+        {
+            SetStartOrGoalCell(cell);
+        }
+        else
+        {
+            SelectStartOrGoalCell(cell);
+        }
+    }
+
+    private void SetCellWalkable(MapCell cell)
+    {
+        cell.IsWalkable = true;
+        cell.UpdateColor();
+    }
+
+    private void SetStartOrGoalCell(MapCell cell)
+    {
+        if (!cell.IsWalkable) return;
+
+        cell.IsWalkable = true;
+        cell.UpdateColor();
+
+        _startCell = cell;
+        OnStartCell?.Invoke(cell);
+        _startCell.Select();
+
+        _goalCell = (MapCell)_map.GetCell(cell.X, 0);
+        _goalCell.Select();
+        OnEndCell?.Invoke(_goalCell);
+
+        StartPathfinding();
+    }
+
+    private void SelectStartOrGoalCell(MapCell cell)
+    {
+        if (!cell.IsWalkable) return;
+
+        if (_startCell == null)
+        {
+            _startCell = cell;
+            OnStartCell?.Invoke(cell);
+            cell.Select();
+        }
+        else if (_goalCell == null && !_isPathfindingInProgress)
+        {
+            _goalCell = cell;
+            OnEndCell?.Invoke(cell);
+            cell.Select();
+            StartPathfinding();
+        }
+        else
+        {
+            _startCell = null;
+            _goalCell = null;
+        }
+    }
 
     private void StartPathfinding()
     {
-        _isPathfindingInProgress = true; 
+        _isPathfindingInProgress = true;
         FindPath();
-        _isPathfindingInProgress = false; 
+        _isPathfindingInProgress = false;
     }
 
     private void FindPath()
     {
-        if (startCell != null && goalCell != null)
+        if (_startCell != null && _goalCell != null)
         {
-            _stopwatch.Start(); 
+            _stopwatch.Start();
 
-          
             _cachedPath.Clear();
 
-            IList<ICell> path = _pathFinder.FindPathOnMap(startCell, goalCell, _map);
+            IList<ICell> path = _pathFinder.FindPathOnMap(_startCell, _goalCell, _map);
 
             _stopwatch.Stop();
 
             if (path.Count > 1)
             {
-                _cachedPath.AddRange(path); 
+                _cachedPath.AddRange(path);
                 _mapManager.HighlightPath(_cachedPath);
                 OnPathFound?.Invoke(_cachedPath.Count, _stopwatch.ElapsedMilliseconds);
             }
@@ -162,9 +162,7 @@ public class PathManager : MonoBehaviour
             }
         }
 
-        startCell = null;
-        goalCell = null;
+        _startCell = null;
+        _goalCell = null;
     }
-
-    
 }
